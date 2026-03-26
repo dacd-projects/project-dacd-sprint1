@@ -6,5 +6,7 @@ public class Main {
 
         Api2Service service = new Api2Service();
         service.execute();
+        System.out.println("Sistema funcionando correctamente");
     }
 }
+
