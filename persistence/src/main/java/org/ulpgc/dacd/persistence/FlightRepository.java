@@ -2,27 +2,29 @@ package org.ulpgc.dacd.persistence;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.time.Instant;
 
 public class FlightRepository {
 
-    public void saveFlight() throws Exception {
+    public void saveFlight(String icao,
+                           String callsign,
+                           String country,
+                           double altitude,
+                           long lastUpdate) throws Exception {
 
         String sql = """
-            INSERT INTO flight_states
-            (flight_icao, airport, status, altitude, last_update, captured_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO flights
+        (icao, callsign, country, altitude, last_update)
+        VALUES (?, ?, ?, ?, ?)
+    """;
 
-        try (Connection conn = DatabaseManager.connect();
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, "UNKNOWN");
-            stmt.setString(2, "GLOBAL");
-            stmt.setString(3, "ACTIVE");
-            stmt.setDouble(4, 0.0);
-            stmt.setString(5, Instant.now().toString());
-            stmt.setString(6, Instant.now().toString());
+            stmt.setString(1, icao);
+            stmt.setString(2, callsign);
+            stmt.setString(3, country);
+            stmt.setDouble(4, altitude);
+            stmt.setLong(5, lastUpdate);
 
             stmt.executeUpdate();
         }
