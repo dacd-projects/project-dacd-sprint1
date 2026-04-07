@@ -20,6 +20,7 @@ public class Main {
 
         ScheduledExecutorService scheduler =
                 Executors.newScheduledThreadPool(1);
+        System.out.println("Sistema iniciado correctamente");
 
         scheduler.scheduleAtFixedRate(
                 service::execute,
