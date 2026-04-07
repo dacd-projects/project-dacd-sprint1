@@ -1,75 +1,103 @@
-# Project DACD - Sprint 1
+# Space Weather & Aviation Analysis (Sprint 1)
 
 ## Descripción
 
-Este proyecto forma parte de la asignatura **Desarrollo de Aplicaciones para Ciencia de Datos (DACD)**.
+El objetivo es analizar el impacto del **clima espacial** en la **aviación comercial**, especialmente en rutas transpolares.
 
-El objetivo de este primer sprint es comenzar la construcción de una aplicación Java organizada en múltiples módulos, capaz de:
 
-* Obtener datos desde una **API pública**
-* Procesar y organizar la información obtenida
+## Objetivo
 
----
+Capturar datos en tiempo real desde dos fuentes independientes:
 
-## Estructura del proyecto
+*  **Clima espacial (NASA DONKI API)**
+*  **Vuelos en tiempo real (OpenSky API)**
 
-El proyecto se ha organizado como un **proyecto multimódulo utilizando Maven**, con la siguiente estructura:
+Los datos se almacenan de forma incremental en una base de datos SQLite para análisis posteriores.
+
+
+## Arquitectura
+
+El proyecto sigue una arquitectura **multimódulo**:
 
 ```
 project-dacd-sprint1
 │
-├── source-api
-│   ├── ApiClient
-│   └── ApiService
-│
-└── source-scraper
-    ├── ScraperClient
-    └── ScraperService
+├── flight-api
+├── weather-api
+├── persistence
 ```
 
----
+###  Componentes
 
-## Arquitectura inicial
+* **Client** → consumo de API
+* **Service** → lógica de negocio
+* **Repository (DAO)** → persistencia en SQLite
 
-Se ha definido una separación clara de responsabilidades entre los módulos:
 
-* **source-api** → Encargado de gestionar la comunicación con APIs externas.
-* **source-scraper** → Encargado de realizar la extracción de datos desde páginas web.
+## Base de Datos
 
-Dentro de cada módulo se han definido dos tipos principales de clases:
+### Tabla: flights
 
-* **Client** → Responsable de realizar la conexión o acceso a la fuente de datos.
-* **Service** → Responsable de gestionar la lógica de negocio y el procesamiento de la información.
+* icao
+* callsign
+* country
+* latitude
+* longitude
+* altitude
+* velocity
+* last_update
+* captured_at
 
----
+### Tabla: space_weather
 
-## Tecnologías utilizadas
+* event_type
+* kp_index
+* start_time
+* end_time
+* source
+* captured_at
 
-Las principales tecnologías empleadas en este proyecto son:
 
-* **Java 21**
-* **Maven** (gestión de dependencias y estructura multimódulo)
-* **IntelliJ IDEA** (entorno de desarrollo)
-* **Git y GitHub** (control de versiones)
+## Ejecución
 
----
+El sistema se ejecuta automáticamente cada hora mediante:
 
-## Enfoque del proyecto
+```
+ScheduledExecutorService
+```
 
-El sistema integrará distintas fuentes de información económica con el objetivo de analizar la relación entre noticias recientes y fluctuaciones en los mercados financieros.
+## Alertas
 
-Se combinarán:
+El sistema genera alertas en consola cuando:
 
-- Noticias globales mediante NewsAPI
-- Precios y estadísticas de criptomonedas mediante CoinGecko API
-- Datos financieros adicionales (acciones y tasas de cambio) mediante Alpha Vantage
+*  Kp ≥ 5 → tormenta geomagnética fuerte
 
----
+Ejemplo:
 
-## Objetivo funcional
+```
+ALERTA: Tormenta geomagnética Kp=6
+```
 
-Permitir:
 
-- Relacionar variaciones en precios de criptomonedas con noticias económicas recientes.
-- Generar visualizaciones o alertas basadas en eventos relevantes.
-- Construir un pequeño sistema de seguimiento financiero combinado.
+## Tecnologías
+
+* Java 21
+* Maven (multimódulo)
+* SQLite
+* Jackson (JSON parsing)
+* OpenSky API
+* NASA DONKI API
+
+
+## Futuro (Sprint 2)
+
+* Correlación clima espacial vs vuelos
+* Mapas de calor
+* Visualización avanzada
+
+
+## Autores
+
+Adrián Santana Rosales – ULPGC
+Nira Armas Maestre – ULPGC
+Grado en Ciencia e Ingeniería de Datos
