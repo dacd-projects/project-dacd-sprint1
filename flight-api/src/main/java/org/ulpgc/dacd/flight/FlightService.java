@@ -53,6 +53,9 @@ public class FlightService {
                                 lastUpdate,
                                 capturedAt
                         );
+                        if (altitude < 8000) {
+                            System.out.println("⚠️ POSIBLE DESVÍO: Vuelo " + callsign + " con baja altitud: " + altitude);
+                        }
                     }
                 }
             }
