@@ -31,6 +31,10 @@ public class FlightService {
                         String callsign = state.get(1).asText();
                         String country = state.get(2).asText();
 
+                        if (!isRelevantAirport(callsign)) {
+                            continue;
+                        }
+
                         long lastUpdate = state.get(4).asLong();
 
                         double longitude = state.get(5).asDouble();
@@ -58,5 +62,13 @@ public class FlightService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private boolean isRelevantAirport(String callsign) {
+
+        if (callsign == null) return false;
+
+        return callsign.contains("ANC") ||
+                callsign.contains("KEF") ||
+                callsign.contains("OSL");
     }
 }
