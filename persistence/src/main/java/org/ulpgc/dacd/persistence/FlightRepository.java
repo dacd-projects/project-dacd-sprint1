@@ -12,10 +12,10 @@ public class FlightRepository {
                            long lastUpdate) throws Exception {
 
         String sql = """
-        INSERT INTO flights
-        (icao, callsign, country, altitude, last_update)
-        VALUES (?, ?, ?, ?, ?)
-    """;
+            INSERT INTO flights
+            (icao, callsign, country, altitude, last_update)
+            VALUES (?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
