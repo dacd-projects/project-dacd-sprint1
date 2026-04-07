@@ -16,8 +16,12 @@ public class SchemaInitializer {
                     icao TEXT,
                     callsign TEXT,
                     country TEXT,
+                    latitude REAL,
+                    longitude REAL,
                     altitude REAL,
-                    last_update INTEGER
+                    velocity REAL,
+                    last_update INTEGER,
+                    captured_at INTEGER
                 )
             """);
         }
