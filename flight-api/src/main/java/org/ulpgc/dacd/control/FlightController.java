@@ -22,7 +22,7 @@ public class FlightController {
                 Executors.newScheduledThreadPool(1);
 
         scheduler.scheduleAtFixedRate(
-                this::run,
+                this::execute,
                 0,
                 1,
                 TimeUnit.HOURS
