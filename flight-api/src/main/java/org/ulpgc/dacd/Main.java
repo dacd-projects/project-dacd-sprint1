@@ -17,15 +17,7 @@ public class Main {
         FlightFeeder feeder = new OpenSkyFlightFeeder();
         FlightStore store = new SqliteFlightStore();
         FlightController controller = new FlightController(feeder, store);
+        controller.run();
 
-        ScheduledExecutorService scheduler =
-                Executors.newScheduledThreadPool(1);
-
-        scheduler.scheduleAtFixedRate(
-                controller::execute,
-                0,
-                1,
-                TimeUnit.HOURS
-        );
     }
 }

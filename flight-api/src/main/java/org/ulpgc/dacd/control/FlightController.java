@@ -2,6 +2,9 @@ package org.ulpgc.dacd.control;
 
 import org.ulpgc.dacd.model.Flight;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class FlightController {
 
@@ -13,7 +16,20 @@ public class FlightController {
         this.store = store;
     }
 
-    public void execute() {
+    public void run() {
+
+        ScheduledExecutorService scheduler =
+                Executors.newScheduledThreadPool(1);
+
+        scheduler.scheduleAtFixedRate(
+                this::run,
+                0,
+                1,
+                TimeUnit.HOURS
+        );
+    }
+
+    private void execute() {
         List<Flight> flights = feeder.fetchFlights();
         for (Flight flight : flights) {
             store.save(flight);
