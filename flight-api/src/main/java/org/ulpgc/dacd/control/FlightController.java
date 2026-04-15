@@ -29,7 +29,7 @@ public class FlightController {
         );
     }
 
-    private void execute() {
+    public void execute() {
         List<Flight> flights = feeder.fetchFlights();
         for (Flight flight : flights) {
             store.save(flight);
