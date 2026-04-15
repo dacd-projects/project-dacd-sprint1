@@ -2,6 +2,7 @@ package org.ulpgc.dacd.spaceweather;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ulpgc.dacd.control.SpaceWeatherClient;
 import org.ulpgc.dacd.persistence.SpaceWeatherRepository;
 
 public class SpaceWeatherService {
