@@ -29,7 +29,7 @@ public class SpaceWeatherController {
         );
     }
 
-    private void execute() {
+    public void execute() {
         List<SpaceWeather> events = feeder.fetchEvents();
         for (SpaceWeather event : events) {
             store.save(event);
