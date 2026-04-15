@@ -7,7 +7,6 @@ import org.ulpgc.dacd.control.SpaceWeatherStore;
 import org.ulpgc.dacd.control.SqliteSpaceWeatherStore;
 
 public class Main {
-
     public static void main(String[] args) {
 
         NasaFeeder feeder = new SpaceWeatherClient();
