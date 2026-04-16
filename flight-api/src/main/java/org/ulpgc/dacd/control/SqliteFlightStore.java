@@ -26,7 +26,7 @@ public class SqliteFlightStore implements FlightStore {
                     longitude REAL,
                     altitude REAL,
                     velocity REAL,
-                    last_update INTEGER,
+                    last_update TEXT,
                     captured_at INTEGER
                 )
                 """;
@@ -55,7 +55,7 @@ public class SqliteFlightStore implements FlightStore {
             stmt.setDouble(5, flight.getLongitude());
             stmt.setDouble(6, flight.getAltitude());
             stmt.setDouble(7, flight.getVelocity());
-            stmt.setLong(8, flight.getLastUpdate());
+            stmt.setString(8, flight.getLastUpdate().toString());
             stmt.setLong(9, flight.getCapturedAt());
 
             stmt.executeUpdate();

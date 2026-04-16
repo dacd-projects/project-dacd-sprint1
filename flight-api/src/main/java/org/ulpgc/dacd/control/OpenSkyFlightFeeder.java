@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class OpenSkyFlightFeeder implements FlightFeeder {
 
                 String icao = state.get(0).getAsString();
                 String country = state.get(2).getAsString();
-                long lastUpdate = state.get(4).getAsLong();
+                Instant lastUpdate = Instant.ofEpochSecond(state.get(4).getAsLong());
                 double longitude = state.get(5).getAsDouble();
                 double latitude = state.get(6).getAsDouble();
                 double altitude = state.get(7).getAsDouble();

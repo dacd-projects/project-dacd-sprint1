@@ -1,4 +1,5 @@
 package org.ulpgc.dacd.model;
+import java.time.Instant;
 
 public class Flight {
 
@@ -9,12 +10,12 @@ public class Flight {
     private final double longitude;
     private final double altitude;
     private final double velocity;
-    private final long lastUpdate;
+    private final Instant lastUpdate;
     private final long capturedAt;
 
     public Flight(String icao, String callsign, String country,
                   double latitude, double longitude, double altitude,
-                  double velocity, long lastUpdate, long capturedAt) {
+                  double velocity, Instant lastUpdate, long capturedAt) {
         this.icao = icao;
         this.callsign = callsign;
         this.country = country;
@@ -33,6 +34,6 @@ public class Flight {
     public double getLongitude() { return longitude; }
     public double getAltitude() { return altitude; }
     public double getVelocity() { return velocity; }
-    public long getLastUpdate() { return lastUpdate; }
+    public Instant getLastUpdate() { return lastUpdate; }
     public long getCapturedAt() { return capturedAt; }
 }
