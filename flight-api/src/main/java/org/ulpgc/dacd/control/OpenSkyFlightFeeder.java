@@ -53,6 +53,10 @@ public class OpenSkyFlightFeeder implements FlightFeeder {
 
                 String icao = state.get(0).getAsString();
                 String country = state.get(2).getAsString();
+                if (state.get(4).isJsonNull() || state.get(5).isJsonNull() ||
+                        state.get(6).isJsonNull() || state.get(7).isJsonNull() ||
+                        state.get(9).isJsonNull()) continue;
+
                 Instant lastUpdate = Instant.ofEpochSecond(state.get(4).getAsLong());
                 double longitude = state.get(5).getAsDouble();
                 double latitude = state.get(6).getAsDouble();
@@ -74,9 +78,6 @@ public class OpenSkyFlightFeeder implements FlightFeeder {
     }
 
     private boolean isRelevantFlight(String callsign) {
-        if (callsign == null) return false;
-        return callsign.contains("ANC") ||
-                callsign.contains("KEF") ||
-                callsign.contains("OSL");
+        return callsign != null && !callsign.isEmpty();
     }
 }
