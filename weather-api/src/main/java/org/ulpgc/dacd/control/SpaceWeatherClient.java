@@ -16,7 +16,7 @@ import java.util.List;
 public class SpaceWeatherClient implements NasaFeeder {
 
     private static final String URL =
-            "https://api.nasa.gov/DONKI/GST?api_key=DEMO_KEY";
+            "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json";
 
     @Override
     public List<SpaceWeather> fetchEvents() {
@@ -42,22 +42,11 @@ public class SpaceWeatherClient implements NasaFeeder {
 
                 JsonObject event = element.getAsJsonObject();
 
-                String eventType = event.get("gstID").getAsString();
-
-                double kpIndex = 0;
-                JsonArray kpArray = event.getAsJsonArray("allKpIndex");
-                if (kpArray != null && kpArray.size() > 0) {
-                    kpIndex = kpArray.get(0).getAsJsonObject()
-                            .get("kpIndex").getAsDouble();
-                }
-
-                String startTime = event.get("startTime").getAsString();
-                String endTime = event.has("endTime") && !event.get("endTime").isJsonNull()
-                        ? event.get("endTime").getAsString()
-                        : "";
+                String timeTag = event.get("time_tag").getAsString();
+                double kpIndex = event.get("estimated_kp").getAsDouble();
 
                 events.add(new SpaceWeather(
-                        eventType, kpIndex, startTime, endTime, "NASA", capturedAt
+                        "KP_INDEX", kpIndex, timeTag, "", "NOAA", capturedAt
                 ));
             }
 
