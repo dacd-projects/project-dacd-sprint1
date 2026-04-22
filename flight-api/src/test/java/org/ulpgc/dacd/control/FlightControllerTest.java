@@ -2,6 +2,7 @@ package org.ulpgc.dacd.control;
 
 import org.junit.jupiter.api.Test;
 import org.ulpgc.dacd.model.Flight;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +27,6 @@ public class FlightControllerTest {
         FlightController controller = new FlightController(fakeFeeder, fakeStore);
         controller.execute();
 
-        assert saved.size() == 2;
+        assertEquals(2, saved.size());
     }
 }
