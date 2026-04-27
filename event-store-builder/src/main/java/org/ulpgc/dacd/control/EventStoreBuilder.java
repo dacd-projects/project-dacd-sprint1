@@ -5,25 +5,30 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class EventStoreBuilder implements MessageListener {
 
-    private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String CLIENT_ID = "event-store-builder";
-    private static final String[] TOPICS = {"Flight", "SpaceWeather"};
+    private final String brokerUrl;
+    private final String clientId;
+    private final String[] topics;
 
     private final FileEventStore fileEventStore = new FileEventStore();
 
+    public EventStoreBuilder(String brokerUrl, String clientId, String[] topics) {
+        this.brokerUrl = brokerUrl;
+        this.clientId = clientId;
+        this.topics = topics;
+    }
+
     public void start() {
         try {
-            ConnectionFactory factory = new ActiveMQConnectionFactory(BROKER_URL);
+            ConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
             Connection connection = factory.createConnection();
-            connection.setClientID(CLIENT_ID);
             connection.start();
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-            for (String topicName : TOPICS) {
+            for (String topicName : topics) {
                 Topic topic = session.createTopic(topicName);
-                TopicSubscriber subscriber = session.createDurableSubscriber(topic, topicName + "-sub");
-                subscriber.setMessageListener(this);
+                MessageConsumer consumer = session.createConsumer(topic);
+                consumer.setMessageListener(this);
             }
 
             System.out.println("Event Store Builder escuchando...");
