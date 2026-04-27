@@ -9,7 +9,6 @@ import org.ulpgc.dacd.control.OpenSkyFlightFeeder;
 public class Main {
 
     public static void main(String[] args) {
-
         FlightFeeder feeder = new OpenSkyFlightFeeder();
         FlightStore store = new ActiveMQFlightStore();
         FlightController controller = new FlightController(feeder, store);
