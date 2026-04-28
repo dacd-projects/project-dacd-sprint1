@@ -189,21 +189,22 @@ classDiagram
 
 Los eventos se almacenan en la siguiente estructura de directorios:
 
+```text
 eventstore/
 └── {topic}/
 └── {source}/
 └── {YYYYMMDD}.events
-
+```
 Ejemplo:
-
+```text
 eventstore/
 ├── Flight/
 │   └── flight-api/
 │       └── 20260427.events
 └── SpaceWeather/
-└── weather-api/
-└── 20260427.events
-
+    └── weather-api/
+        └── 20260427.events
+```
 Cada línea de un fichero `.events` representa un evento JSON con al menos los campos:
 
 - `ts` → timestamp del evento
