@@ -1,13 +1,10 @@
-# Space Weather & Aviation Analysis — Sprint 1
+# Space Weather & Aviation Analysis — Sprint 2
 
 ## Contexto
 
-Proyecto que analiza el impacto del **clima espacial** en la **aviación comercial**,
-especialmente en rutas transpolares. Se capturan tormentas geomagnéticas (NASA DONKI API)
-y vuelos en tiempo real (OpenSky API), almacenándolos de forma incremental en SQLite
-para su análisis posterior.
+Proyecto que analiza el impacto del **clima espacial** en la **aviación comercial**, especialmente en rutas transpolares. Se capturan datos geomagnéticos (NOAA API) y vuelos en tiempo real (OpenSky API), publicándolos en un broker de mensajería (ActiveMQ) y almacenándolos en un Event Store basado en ficheros.
 
-> Sprint 1: captura y persistencia independiente de cada fuente. Sin cruce de datos.
+> Sprint 2: implementación del patrón Publisher/Subscriber mediante ActiveMQ y Event Store Builder.
 
 ---
 
@@ -15,8 +12,9 @@ para su análisis posterior.
 
 | Módulo | Responsabilidad |
 |---|---|
-| `flight-api` | Captura vuelos en tiempo real desde OpenSky Network y los persiste en SQLite |
-| `weather-api` | Captura tormentas geomagnéticas desde NASA DONKI API y las persiste en SQLite |
+| `flight-api` | Captura vuelos en tiempo real desde OpenSky Network y los publica en ActiveMQ |
+| `weather-api` | Captura índices Kp desde NOAA y los publica en ActiveMQ |
+| `event-store-builder` | Se suscribe a los topics y persiste los eventos en un Event Store basado en ficheros |
 
 ---
 
@@ -32,8 +30,10 @@ graph TD
         FA_Controller --> FA_Store[FlightStore]
         FA_Feeder --> FA_OpenSky[OpenSkyFlightFeeder]
         FA_Store --> FA_Sqlite[SqliteFlightStore]
+        FA_Store --> FA_ActiveMQ[ActiveMQFlightStore]
         FA_OpenSky --> FA_Model[Flight]
         FA_Sqlite --> FA_Model
+        FA_ActiveMQ --> FA_Model
     end
 
     subgraph weather-api
@@ -42,9 +42,19 @@ graph TD
         WA_Controller --> WA_Store[SpaceWeatherStore]
         WA_Feeder --> WA_Client[SpaceWeatherClient]
         WA_Store --> WA_Sqlite[SqliteSpaceWeatherStore]
+        WA_Store --> WA_ActiveMQ[ActiveMQSpaceWeatherStore]
         WA_Client --> WA_Model[SpaceWeather]
         WA_Sqlite --> WA_Model
+        WA_ActiveMQ --> WA_Model
     end
+
+    subgraph event-store-builder
+        ESB_Main[Main] --> ESB_Builder[EventStoreBuilder]
+        ESB_Builder --> ESB_FileStore[FileEventStore]
+    end
+
+    FA_ActiveMQ -- Topic: Flight --> ESB_Builder
+    WA_ActiveMQ -- Topic: SpaceWeather --> ESB_Builder
 ```
 
 ### Diagrama de clases — `flight-api`
@@ -74,6 +84,9 @@ classDiagram
     class SqliteFlightStore {
         +save(flight: Flight)
     }
+    class ActiveMQFlightStore {
+        +save(flight: Flight)
+    }
     class Flight {
         -icao: String
         -callsign: String
@@ -91,8 +104,10 @@ classDiagram
     FlightController --> FlightStore
     FlightFeeder <|.. OpenSkyFlightFeeder
     FlightStore <|.. SqliteFlightStore
+    FlightStore <|.. ActiveMQFlightStore
     OpenSkyFlightFeeder --> Flight
     SqliteFlightStore --> Flight
+    ActiveMQFlightStore --> Flight
 ```
 
 ### Diagrama de clases — `weather-api`
@@ -122,6 +137,9 @@ classDiagram
     class SqliteSpaceWeatherStore {
         +save(event: SpaceWeather)
     }
+    class ActiveMQSpaceWeatherStore {
+        +save(event: SpaceWeather)
+    }
     class SpaceWeather {
         -eventType: String
         -kpIndex: double
@@ -136,44 +154,62 @@ classDiagram
     SpaceWeatherController --> SpaceWeatherStore
     NasaFeeder <|.. SpaceWeatherClient
     SpaceWeatherStore <|.. SqliteSpaceWeatherStore
+    SpaceWeatherStore <|.. ActiveMQSpaceWeatherStore
     SpaceWeatherClient --> SpaceWeather
     SqliteSpaceWeatherStore --> SpaceWeather
+    ActiveMQSpaceWeatherStore --> SpaceWeather
+```
+
+### Diagrama de clases — `event-store-builder`
+
+```mermaid
+classDiagram
+    class Main {
+        +main(args: String[])
+    }
+    class EventStoreBuilder {
+        -brokerUrl: String
+        -clientId: String
+        -topics: String[]
+        -fileEventStore: FileEventStore
+        +start()
+        +onMessage(message: Message)
+    }
+    class FileEventStore {
+        +save(topic: String, json: String)
+    }
+
+    Main --> EventStoreBuilder
+    EventStoreBuilder --> FileEventStore
 ```
 
 ---
 
-## Base de Datos
+## Event Store
 
-Base de datos compartida: `aviation.db` (SQLite)
+Los eventos se almacenan en la siguiente estructura de directorios:
 
-### Tabla `flights`
+eventstore/
+└── {topic}/
+└── {source}/
+└── {YYYYMMDD}.events
 
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id | INTEGER | Clave primaria |
-| icao | TEXT | Código ICAO |
-| callsign | TEXT | Indicativo de vuelo |
-| country | TEXT | País de origen |
-| latitude | REAL | Latitud |
-| longitude | REAL | Longitud |
-| altitude | REAL | Altitud (metros) |
-| velocity | REAL | Velocidad (m/s) |
-| last_update | TEXT | Última actualización (ISO-8601) |
-| captured_at | INTEGER | Marca temporal de captura |
+Ejemplo:
 
-### Tabla `space_weather`
+eventstore/
+├── Flight/
+│   └── flight-api/
+│       └── 20260427.events
+└── SpaceWeather/
+└── weather-api/
+└── 20260427.events
 
-| Campo | Tipo | Descripción |
-|---|---|---|
-| id | INTEGER | Clave primaria |
-| event_type | TEXT | Identificador del evento GST |
-| kp_index | REAL | Índice Kp de la tormenta |
-| start_time | TEXT | Inicio del evento |
-| end_time | TEXT | Fin del evento |
-| source | TEXT | Fuente (NASA) |
-| captured_at | INTEGER | Marca temporal de captura |
+Cada línea de un fichero `.events` representa un evento JSON con al menos los campos:
 
----
+- `ts` → timestamp del evento
+- `ss` → identificador del sistema origen
+
+
 
 ## Compilar y ejecutar
 
@@ -197,8 +233,14 @@ cd weather-api
 mvn exec:java -Dexec.mainClass="org.ulpgc.dacd.Main"
 ```
 
-Cada módulo se ejecuta de forma **desatendida**, capturando datos **cada hora**
-automáticamente mediante `ScheduledExecutorService`.
+### Ejecutar Event Store Builder
+
+```bash
+cd event-store-builder
+mvn exec:java -Dexec.mainClass="org.ulpgc.dacd.Main" -Dexec.args="tcp://localhost:61616 event-store-builder Flight,SpaceWeather"
+```
+
+> ¡¡Importante!!: El broker ActiveMQ debe estar ejecutándose en `tcp://localhost:61616`
 
 ---
 
@@ -206,15 +248,15 @@ automáticamente mediante `ScheduledExecutorService`.
 
 - Java 21
 - Maven (multimódulo)
+- ActiveMQ 6.2.4
 - SQLite + JDBC
 - Gson
 - OpenSky Network API
-- NASA DONKI API (`DEMO_KEY`)
+- NOAA Space Weather API
 
 ---
 
 ## Autores
 
-Adrián Santana Rosales — ULPGC  
-Nira Armas Maestre — ULPGC  
-Grado en Ciencia e Ingeniería de Datos
+Adrián Santana Rosales
+Nira Armas Maestre
